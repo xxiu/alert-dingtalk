@@ -32,3 +32,13 @@ groups:
       description: "{{ $labels.instance }} CPU usage above 85% (current value: {{ $value }})"
       dingtalkRobot: "https://oapi.dingtalk.com/robot/send?access_token=xxxx"
 ```
+
+# build
+```
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o alert-dingtalk
+```
+
+# DOCKER RUN 
+
+docker-compose build
+docker-compose up -d 

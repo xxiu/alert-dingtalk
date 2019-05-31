@@ -1,0 +1,8 @@
+version: '3'
+services:
+  alert-dingtalk:
+    build: .
+    image: xxiu/alert-dingtalk
+    command: ' -defaultRobot=https://oapi.dingtalk.com/robot/send?access_token=xxxx'
+    ports:
+      - "8080:8080"
