@@ -14,7 +14,7 @@ func TransformTemplete(notification model.Notification,tempfile string)(text str
 	annotations := notification.CommonAnnotations
 	webhook = annotations["webhook"]
 	tempfile1 := annotations["tempfile"]
-	if tempfile != "" {
+	if tempfile == "" {
 		tempfile = tempfile1 
 	}
 

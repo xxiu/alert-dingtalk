@@ -3,10 +3,11 @@ package main
 import (
 	"flag"
 	"net/http"
-
+	"fmt"
 	"github.com/gin-gonic/gin"
 	model "github.com/xxiu/alert-webhook/model"
 	"github.com/xxiu/alert-webhook/notifier"
+
 )
 
 var (
@@ -40,6 +41,8 @@ func main() {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+
+		fmt.Println(tempFile)
 
 		err = notifier.Send(notification, webHookUrl,tempFile)
 
