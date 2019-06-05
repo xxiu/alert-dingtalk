@@ -4,11 +4,8 @@ Prometheus 中的 webhook 触发后的数据结构是固定的。如果要对接
 
 这样做的好处是只需要一个模板文件就可以匹配到合适的 Webhook 上,方便自定义消息。 
 
-
 #运行
 
--url  webhook 地址
--tpl  模板路径 
 ```
 go run main.go -url "https://oapi.dingtalk.com/robot/send?access_token=xxx" -tpl "temp/default.tpl"
 ```
@@ -19,7 +16,7 @@ go run main.go -url "https://oapi.dingtalk.com/robot/send?access_token=xxx" -tpl
 1. build
    编译 linux 环境使用的文件
 ```
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o alert-webhook 
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o alert-webhook-amd64 
 ```
 
 2. docker-compose 编译 image
