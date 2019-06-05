@@ -3,20 +3,23 @@ package main
 import (
 	"flag"
 	"net/http"
-
+	"fmt"
 	"github.com/gin-gonic/gin"
-	model "github.com/xxiu/alertmanager-dingtalk-webhook/model"
-	"github.com/xxiu/alertmanager-dingtalk-webhook/notifier"
+	model "github.com/xxiu/alert-webhook/model"
+	"github.com/xxiu/alert-webhook/notifier"
+
 )
 
 var (
 	h            bool
-	defaultRobot string
+	webHookUrl 		 string
+	tempFile  	 string  
 )
 
 func init() {
 	flag.BoolVar(&h, "h", false, "help")
-	flag.StringVar(&defaultRobot, "defaultRobot", "", "global dingtalk robot webhook, you can overwrite by alert rule with annotations dingtalkRobot")
+	flag.StringVar(&webHookUrl, "url", "", "webhook url ")
+	flag.StringVar(&tempFile,"tpl","temp/default.tpl"," template file  ")
 }
 
 func main() {
@@ -27,7 +30,7 @@ func main() {
 		flag.Usage()
 		return
 	}
-
+	gin.SetMode(gin.DebugMode)
 	router := gin.Default()
 	router.POST("/webhook", func(c *gin.Context) {
 		var notification model.Notification
@@ -39,7 +42,9 @@ func main() {
 			return
 		}
 
-		err = notifier.Send(notification, defaultRobot)
+		fmt.Println(tempFile)
+
+		err = notifier.Send(notification, webHookUrl,tempFile)
 
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
