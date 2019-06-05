@@ -1,8 +1,8 @@
 version: '3'
 services:
-  alert-dingtalk:
+  alert-webhook:
     build: .
-    image: xxiu/alert-dingtalk
+    image: xxiu/alert-webhook
     command: ' -defaultRobot=https://oapi.dingtalk.com/robot/send?access_token=xxxx'
     ports:
       - "8080:8080"

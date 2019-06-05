@@ -1,54 +1,39 @@
-## Alertmanager Dingtalk Webhook
+# Alertmanager  Webhook
 
-Webhook service support send Prometheus 2.0 alert message to Dingtalk.
+Prometheus 中的 webhook 触发后的数据结构是固定的。如果要对接到其他提醒的平台,需要一个触发转换的过程。`alert-webhook` 利用json 将 Prometheus 的消息转换为对象后，绑定到指定的模板。然后将模板信息 POST 到指定的地址。 
 
-## How To Use
+这样做的好处是只需要一个模板文件就可以匹配到合适的 Webhook 上,方便自定义消息。 
 
+
+#运行
+
+-url  webhook 地址
+-tpl  模板路径 
 ```
-cd cmd/webhook
-go build
-webhook -defaultRobot=https://oapi.dingtalk.com/robot/send?access_token=xxxx
-```
-
-```
-go run webhook.go -defaultRobot=https://oapi.dingtalk.com/robot/send?access_token=xxxx
-```
-
-* -defaultRobot: default dingtalk webhook url, all notifaction from alertmanager will direct to this webhook address.
-
-Or you can overwrite by add annotations to Prometheus alertrule to special the dingtalk webhook for each alert rule.
-
-```
-groups:
-- name: hostStatsAlert
-  rules:
-  - alert: hostCpuUsageAlert
-    expr: sum(avg without (cpu)(irate(node_cpu{mode!='idle'}[5m]))) by (instance) > 0.85
-    for: 1m
-    labels:
-      severity: page
-    annotations:
-      summary: "Instance {{ $labels.instance }} CPU usgae high"
-      description: "{{ $labels.instance }} CPU usage above 85% (current value: {{ $value }})"
-      dingtalkRobot: "https://oapi.dingtalk.com/robot/send?access_token=xxxx"
+go run main.go -url "https://oapi.dingtalk.com/robot/send?access_token=xxx" -tpl "temp/default.tpl"
 ```
 
-# build
+
+# docker run 
+
+1. build
+   编译 linux 环境使用的文件
 ```
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o alert-dingtalk
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o alert-webhook 
 ```
 
-# DOCKER RUN 
+2. docker-compose 编译 image
 ```
 docker-compose build
 docker-compose up -d 
-```
+``` 
 
 # webhook_config
 
 https://prometheus.io/docs/alerting/configuration/#webhook_config 
 
-
+prometheus webhook 对应到 go 对象。对象匹配模板后，提交指定的 hook 
+模板参考 `temp/default.tpl`
 
 ```
 {
@@ -74,7 +59,6 @@ https://prometheus.io/docs/alerting/configuration/#webhook_config
 }
 ```
 对应变量 
-
 ```
 type Alert struct {
 	Status      string            `json:"status"`
