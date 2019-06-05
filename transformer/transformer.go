@@ -23,7 +23,9 @@ func TransformTemplete(notification model.Notification,tempfile string)(text str
 	tpl := template.Must(template.ParseFiles(tempfile))
 
 	buf :=new(bytes.Buffer)
-	tpl.Execute(buf,notification)
+	err =tpl.Execute(buf,notification)
+
+	fmt.Println(err)
 
 	text = buf.String()
 

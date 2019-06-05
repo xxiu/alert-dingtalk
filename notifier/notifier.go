@@ -16,6 +16,8 @@ func Send(notification model.Notification, defaultwebhook string,tempfile string
 	// markdown, robotURL, err := transformer.TransformToMarkdown(notification)
 	text,webhook,err := transformer.TransformTemplete(notification,tempfile)
  
+	fmt.Println(text)
+	
 	if err != nil {
 		return
 	}
