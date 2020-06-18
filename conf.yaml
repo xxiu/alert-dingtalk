@@ -1,0 +1,16 @@
+
+host: "0.0.0.0"
+prot: "8080"
+
+webhook: "https://oapi.dingtalk.com/robot/send?access_token=02988d19ace11c94a83d5ef0eeaa0804420363ffc9ac3e78f36a0e790aa9cd86"
+
+route:
+  - url: "/webhook"
+    tempfile: "temp/default.tpl"
+   
+  - url: "/log"
+    tempfile: "temp/log.tpl"
+ 
+  - url: "/test"
+    tempfile: "temp/test.tpl"
+  

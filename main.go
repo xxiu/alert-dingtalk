@@ -1,58 +1,100 @@
 package main
 
 import (
+	"alert-webhook/notifier"
 	"flag"
-	"net/http"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	model "github.com/xxiu/alert-webhook/model"
-	"github.com/xxiu/alert-webhook/notifier"
+	"io/ioutil"
+	"net/http"
 
+	"github.com/gin-gonic/gin"
+	"gopkg.in/yaml.v2"
 )
 
+type Config struct {
+	Host    string        `yaml:"host"`
+	Prot    string        `yaml:"prot"`
+	WebHook string        `yaml:"webhook"`
+	Route   []ConfigRoute `yaml:"route"`
+}
+
+type ConfigRoute struct {
+	Url      string `yaml:"url"`
+	TempFile string `yaml:"tempfile"`
+	WebHook  string `yaml:"webhook"`
+}
+
 var (
-	h            bool
-	webHookUrl 		 string
-	tempFile  	 string  
+	conf      string
+	routeDict map[string]ConfigRoute
 )
 
 func init() {
-	flag.BoolVar(&h, "h", false, "help")
-	flag.StringVar(&webHookUrl, "url", "", "webhook url ")
-	flag.StringVar(&tempFile,"tpl","temp/default.tpl"," template file  ")
-}
-
-func main() {
-
+	flag.StringVar(&conf, "c", "conf.yaml", "config path ,defaule: conf.yaml")
 	flag.Parse()
 
-	if h {
-		flag.Usage()
-		return
+	routeDict = make(map[string]ConfigRoute)
+
+}
+
+func getConf() *Config {
+
+	yamlFile, err := ioutil.ReadFile(conf)
+	if err != nil {
+		fmt.Println(err.Error())
 	}
-	gin.SetMode(gin.DebugMode)
-	router := gin.Default()
-	router.POST("/webhook", func(c *gin.Context) {
-		var notification model.Notification
+	var c Config
+	err = yaml.Unmarshal(yamlFile, &c)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	return &c
+}
 
-		err := c.BindJSON(&notification)
+func Handle(c *gin.Context) {
 
+	path := c.Request.URL.Path
+	if r, ok := routeDict[path]; ok {
+		// data, _ := ioutil.ReadAll(c.Request.Body)
+		var jsonData map[string]interface{}
+		// err := json.Unmarshal(data, &jsonData)
+
+		err := c.BindJSON(&jsonData)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-
-		fmt.Println(tempFile)
-
-		err = notifier.Send(notification, webHookUrl,tempFile)
+		fmt.Printf("%v ,%v,%s", jsonData, r, path)
+		txt, _ := notifier.TempMust(jsonData, r.TempFile)
+		fmt.Printf(txt)
+		err = notifier.SendData(txt, r.WebHook)
 
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"code": "500", "msg": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"code": "200", "msg": ""})
+	} else {
+		c.JSON(http.StatusOK, gin.H{"code": "404"})
+	}
+}
 
+func main() {
+
+	config := getConf()
+	fmt.Println(config.Host)
+	fmt.Println(config.Prot)
+	fmt.Println(config.WebHook)
+
+	gin.SetMode(gin.DebugMode)
+	ginroute := gin.Default()
+	for _, route := range config.Route {
+		if route.WebHook == "" {
+			route.WebHook = config.WebHook
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "send to dingtalk successful!"})
-
-	})
-	router.Run(":8080")
+		routeDict[route.Url] = route
+		ginroute.POST(route.Url, Handle)
+	}
+	ginroute.Run(fmt.Sprintf("%s:%s", config.Host, config.Prot))
 }

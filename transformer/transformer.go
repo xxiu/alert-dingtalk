@@ -1,37 +1,35 @@
 package transformer
 
 import (
+	"alert-webhook/model"
 	"bytes"
 	"fmt"
 	"text/template"
-	"github.com/xxiu/alert-webhook/model"
 )
 
-// 
-func TransformTemplete(notification model.Notification,tempfile string)(text string,webhook string,err error){
-	 
+//
+func TransformTemplete(notification model.Notification, tempfile string) (text string, webhook string, err error) {
 
 	annotations := notification.CommonAnnotations
 	webhook = annotations["webhook"]
 	tempfile1 := annotations["tempfile"]
 	if tempfile == "" {
-		tempfile = tempfile1 
+		tempfile = tempfile1
 	}
 
-    fmt.Println(tempfile)
- 
+	fmt.Println(tempfile)
+
 	tpl := template.Must(template.ParseFiles(tempfile))
 
-	buf :=new(bytes.Buffer)
-	err =tpl.Execute(buf,notification)
+	buf := new(bytes.Buffer)
+	err = tpl.Execute(buf, notification)
 
 	fmt.Println(err)
 
 	text = buf.String()
 
-	return 
+	return
 }
-
 
 // TransformToMarkdown transform alertmanager notification to dingtalk markdow message
 func TransformToMarkdown(notification model.Notification) (markdown *model.DingTalkMarkdown, robotURL string, err error) {
