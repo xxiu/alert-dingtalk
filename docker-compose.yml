@@ -1,7 +1,11 @@
 version: '3'
 services:
   alert-webhook:
-    image: xxiu/alert-webhook
-    command: ' -url=https://oapi.dingtalk.com/robot/send?access_token=xxxx'
+    build: . 
+    image: alert-webhook
+    volumes: 
+      - ./temp:/root/temp
+      - ./conf.yaml:/root/conf.yaml
+    command: " -c /root/conf.yaml"
     ports:
       - "8080:8080"
