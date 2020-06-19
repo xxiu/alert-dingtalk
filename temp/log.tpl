@@ -2,7 +2,15 @@
      "msgtype": "markdown",
      "markdown": {
          "title":"{{ .msg }}",
-         "text": "#### {{ .msg }}  \n> openid:{{ .openid }} \n> \n> ######   [告警](https://www.dingalk.com) \n"
+         "text": "#### {{ .msg }}  \n
+**Level**:{{index . "@level" }} \n
+**Host**: {{ .beat.hostname }} \n
+**Pid**: {{index  . "@pid" }}  \n
+**Err**: {{ .err }}  \n
+**Codefile**:{{index  . "@file" }}  \n
+**Logfile**:{{ .filename }} \n
+**Time**: {{index . "@timestamp" }}\n"
+
      },
       "at": {
           "atMobiles": [
@@ -10,4 +18,4 @@
           ],
           "isAtAll": false
       }
- }
+}
